@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kopi Senja & Ruang — Coffee Shop POS & Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #f7f3ee;
+      --bg-surface: #ffffff;
+      --bg-subtle: #efe8df;
+      --text-primary: #2c1e16;
+      --text-secondary: #6e5a4f;
+      --accent: #b86b35;
+      --accent-hover: #9c5727;
+      --accent-soft: #f5e6d8;
+      --border: #e4d8ca;
+      --success: #2e7d32;
+      --success-bg: #e8f5e9;
+      --warning: #ed6c02;
+      --warning-bg: #fff3e0;
+      --danger: #d32f2f;
+      --danger-bg: #ffebee;
+      --shadow: 0 4px 20px rgba(44, 30, 22, 0.06);
+      --radius: 14px;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #181310;
+      --bg-surface: #231c18;
+      --bg-subtle: #2e2520;
+      --text-primary: #f5ede6;
+      --text-secondary: #b8a69b;
+      --accent: #d98a4e;
+      --accent-hover: #e59b62;
+      --accent-soft: #382920;
+      --border: #3a2f29;
+      --success: #66bb6a;
+      --success-bg: #1b3320;
+      --warning: #ffa726;
+      --warning-bg: #382814;
+      --danger: #ef5350;
+      --danger-bg: #3b1c1c;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    h1, h2, .brand-title {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+    }
+
+    .brand-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-subtle);
+      padding: 5px;
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-count {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 99px;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* Main Layout */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    /* POS Grid */
+    .pos-layout {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .pos-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .category-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      padding: 8px 15px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .pill.active, .pill:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .search-input {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      min-width: 220px;
+      font-size: 0.88rem;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .menu-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+      position: relative;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .menu-card.sold-out {
+      opacity: 0.6;
+    }
+
+    .menu-emoji {
+      font-size: 2.3rem;
+      margin-bottom: 10px;
+      background: var(--bg-subtle);
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+    }
+
+    .menu-cat {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .menu-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+
+    .menu-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .menu-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .menu-price {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9px;
+      padding: 8px 14px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      background: var(--border);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    /* Cart Panel */
+    .cart-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 84px;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .order-meta input, .order-meta select {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      width: 100%;
+    }
+
+    .cart-items {
+      max-height: 290px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-right: 4px;
+    }
+
+    .cart-item {
+      background: var(--bg-subtle);
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-item-info h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .cart-item-note {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .promo-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .promo-box input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.83rem;
+    }
+
+    .summary-rows {
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.88rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+    }
+
+    .summary-row.total {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Barista Queue */
+    .queue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .order-ticket {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ticket-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 10px;
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .status-waiting { background: var(--warning-bg); color: var(--warning); }
+    .status-brewing { background: var(--accent-soft); color: var(--accent); }
+    .status-ready { background: var(--success-bg); color: var(--success); }
+
+    .ticket-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.88rem;
+    }
+
+    .ticket-list li {
+      background: var(--bg-subtle);
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    /* Management Table */
+    .card-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .form-grid input, .form-grid select {
+      padding: 10px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Analytics */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--accent);
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      height: 180px;
+      padding-top: 20px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar-fill {
+      width: 100%;
+      max-width: 44px;
+      background: var(--accent);
+      border-radius: 8px 8px 0 0;
+      transition: height 0.4s ease;
+      min-height: 8px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      place-items: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow);
+    }
+
+    .option-group {
+      margin: 12px 0;
+    }
+
+    .option-group label {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .option-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .opt-pill {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .opt-pill.selected {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .receipt-paper {
+      font-family: monospace;
+      background: #fffdf9;
+      color: #222;
+      padding: 18px;
+      border-radius: 10px;
+      border: 1px dashed #999;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #receiptModal, #receiptModal * { visibility: visible; }
+      #receiptModal { position: absolute; left: 0; top: 0; background: #fff; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">☕</div>
+      <div>
+        <div class="brand-title">Kopi Senja & Ruang</div>
+        <div class="brand-sub">Point of Sale & Barista System</div>
+      </div>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="pos">🧾 Kasir & Menu</button>
+      <button class="tab-btn" data-tab="queue">👨‍🍳 Antrean Barista <span class="badge-count" id="queueBadge">0</span></button>
+      <button class="tab-btn" data-tab="manage">📦 Kelola Menu</button>
+      <button class="tab-btn" data-tab="sales">📊 Laporan Penjualan</button>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle">🌙 Mode Gelap</button>
+  </header>
+
+  <main>
+    <!-- TAB 1: KASIR / POS -->
+    <section id="view-pos" class="view-section active">
+      <div class="pos-layout">
+        <div>
+          <div class="toolbar">
+            <div class="category-pills" id="categoryPills">
+              <button class="pill active" data-cat="Semua">Semua</button>
+              <button class="pill" data-cat="Kopi">Kopi</button>
+              <button class="pill" data-cat="Non-Kopi">Non-Kopi</button>
+              <button class="pill" data-cat="Makanan">Makanan & Pastry</button>
+            </div>
+            <input type="text" class="search-input" id="searchMenu" placeholder="Cari menu kopi, matcha, croissant..." />
+          </div>
+          <div class="menu-grid" id="menuGrid"></div>
+        </div>
+
+        <aside class="cart-panel">
+          <div class="cart-header">
+            <h3>Pesanan Aktif</h3>
+            <button class="btn btn-danger" id="clearCartBtn" style="padding:5px 10px;font-size:0.78rem;">Kosongkan</button>
+          </div>
+
+          <div class="order-meta">
+            <input type="text" id="customerName" placeholder="Nama / No. Meja" value="Meja 04 - Raka" />
+            <select id="orderType">
+              <option value="Dine-in">Dine-in</option>
+              <option value="Takeaway">Takeaway</option>
+            </select>
+          </div>
+
+          <div class="cart-items" id="cartItems">
+            <p style="text-align:center;color:var(--text-secondary);padding:24px 0;font-size:0.86rem;">Belum ada item di keranjang.</p>
+          </div>
+
+          <div class="promo-box">
+            <input type="text" id="promoInput" placeholder="Kode Promo (SENJA10 / KOPI15)" />
+            <button class="btn btn-outline" id="applyPromoBtn">Pakai</button>
+          </div>
+
+          <div class="summary-rows">
+            <div class="summary-row"><span>Subtotal</span><span id="subtotalText">Rp 0</span></div>
+            <div class="summary-row"><span>Diskon</span><span id="discountText">- Rp 0</span></div>
+            <div class="summary-row"><span>Pajak PB1 (10%)</span><span id="taxText">Rp 0</span></div>
+            <div class="summary-row total"><span>Total Bayar</span><span id="totalText">Rp 0</span></div>
+          </div>
+
+          <button class="btn btn-primary" id="checkoutBtn" style="width:100%;margin-top:14px;padding:12px;font-size:0.95rem;">
+            Proses & Cetak Struk
+          </button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TAB 2: ANTREAN BARISTA -->
+    <section id="view-queue" class="view-section">
+      <div class="toolbar">
+        <h2>Antrean Dapur & Barista</h2>
+        <span style="font-size:0.85rem;color:var(--text-secondary);">Klik tombol status untuk memperbarui progres pesanan</span>
+      </div>
+      <div class="queue-grid" id="queueGrid"></div>
+    </section>
+
+    <!-- TAB 3: KELOLA MENU -->
+    <section id="view-manage" class="view-section">
+      <div class="card-box">
+        <h3>Tambah Menu Baru</h3>
+        <form id="addMenuForm" class="form-grid">
+          <input type="text" id="newName" placeholder="Nama Menu (cth: Caramel Macchiato)" required />
+          <select id="newCat">
+            <option value="Kopi">Kopi</option>
+            <option value="Non-Kopi">Non-Kopi</option>
+            <option value="Makanan">Makanan</option>
+          </select>
+          <input type="number" id="newPrice" placeholder="Harga (Rp)" min="1000" step="500" required />
+          <input type="text" id="newEmoji" placeholder="Emoji (cth: ☕)" value="☕" maxlength="4" />
+          <input type="text" id="newDesc" placeholder="Deskripsi singkat" required />
+          <button type="submit" class="btn btn-primary">+ Tambah Menu</button>
+        </form>
+      </div>
+
+      <div class="card-box">
+        <h3>Daftar Menu & Ketersediaan Stok</h3>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Menu</th>
+                <th>Kategori</th>
+                <th>Harga (Rp)</th>
+                <th>Status Stok</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="manageTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: LAPORAN PENJUALAN -->
+    <section id="view-sales" class="view-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Pendapatan Hari Ini</div>
+          <div class="stat-value" id="statRevenue">Rp 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Transaksi</div>
+          <div class="stat-value" id="statOrders">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Menu Terlaris</div>
+          <div class="stat-value" id="statTopItem" style="font-size:1.2rem;">-</div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h3>Grafik Penjualan per Sesi Jam</h3>
+        <div class="chart-bars" id="salesChart"></div>
+      </div>
+
+      <div class="card-box">
+        <h3>Riwayat Transaksi</h3>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID Order</th>
+                <th>Waktu</th>
+                <th>Pelanggan</th>
+                <th>Tipe</th>
+                <th>Total</th>
+                <th>Struk</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL KUSTOMISASI MINUMAN -->
+  <div class="modal-backdrop" id="customModal">
+    <div class="modal-box">
+      <h3 id="modalItemName">Kustomisasi Pesanan</h3>
+      <p id="modalItemPrice" style="color:var(--accent);font-weight:700;margin-top:4px;"></p>
+
+      <div id="drinkOptions">
+        <div class="option-group">
+          <label>Penyajian</label>
+          <div class="option-pills" data-group="temp">
+            <button type="button" class="opt-pill selected" data-val="Ice">❄️ Ice</button>
+            <button type="button" class="opt-pill" data-val="Hot">🔥 Hot</button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <label>Level Gula</label>
+          <div class="option-pills" data-group="sugar">
+            <button type="button" class="opt-pill selected" data-val="Normal Sugar">Normal</button>
+            <button type="button" class="opt-pill" data-val="Less Sugar">Less Sugar</button>
+            <button type="button" class="opt-pill" data-val="No Sugar">No Sugar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>Catatan Tambahan</label>
+        <input type="text" id="modalNote" class="search-input" style="width:100%;" placeholder="Contoh: Extra shot, sedikit es..." />
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+        <button class="btn btn-outline" id="closeCustomModal">Batal</button>
+        <button class="btn btn-primary" id="confirmAddCart">Tambah ke Keranjang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL STRUK PEMBAYARAN -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-box">
+      <div class="receipt-paper" id="receiptContent"></div>
+      <div class="no-print" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-outline" onclick="window.print()">🖨️ Cetak</button>
+        <button class="btn btn-primary" id="closeReceiptModal">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data Awal Menu Kafe
+    let menus = [
+      { id: 1, name: "Es Kopi Susu Senja", category: "Kopi", price: 24000, emoji: "🧋", desc: "Espresso house blend, susu segar, dan gula aren organik.", available: true },
+      { id: 2, name: "Americano Single Origin", category: "Kopi", price: 20000, emoji: "☕", desc: "Double shot Arabica Gayo dengan karakter citrus & caramel.", available: true },
+      { id: 3, name: "Caffè Latte", category: "Kopi", price: 26000, emoji: "🥛", desc: "Espresso lembut berpadu steamed milk microfoam.", available: true },
+      { id: 4, name: "Uji Matcha Latte", category: "Non-Kopi", price: 28000, emoji: "🍵", desc: "Pure matcha grade ceremonial dari Kyoto dengan susu creamy.", available: true },
+      { id: 5, name: "Belgian Dark Chocolate", category: "Non-Kopi", price: 27000, emoji: "🍫", desc: "Cokelat hitam pekat 70% dengan tekstur velvety.", available: true },
+      { id: 6, name: "Butter Croissant", category: "Makanan", price: 22000, emoji: "🥐", desc: "Pastry renyah berlapis mentega Prancis panggang hangat.", available: true },
+      { id: 7, name: "Truffle Fries", category: "Makanan", price: 29000, emoji: "🍟", desc: "Kentang goreng renyah dengan minyak truffle & keju parmesan.", available: true },
+      { id: 8, name: "Burnt Cheesecake", category: "Makanan", price: 32000, emoji: "🍰", desc: "Basque cheesecake lembut dengan bagian atas karamel.", available: false }
+    ];
+
+    let cart = [];
+    let orders = [
+      {
+        id: "ORD-101",
+        time: "08:30",
+        hour: "08:00",
+        customer: "Meja 02 - Dina",
+        type: "Dine-in",
+        status: "ready",
+        items: [{ name: "Caffè Latte", qty: 2, note: "Hot, Normal Sugar", price: 26000 }],
+        total: 57200
+      },
+      {
+        id: "ORD-102",
+        time: "09:15",
+        hour: "09:00",
+        customer: "Takeaway - Bima",
+        type: "Takeaway",
+        status: "brewing",
+        items: [
+          { name: "Es Kopi Susu Senja", qty: 1, note: "Ice, Less Sugar", price: 24000 },
+          { name: "Butter Croissant", qty: 1, note: "Hangatkan", price: 22000 }
+        ],
+        total: 50600
+      }
+    ];
+
+    let activeCategory = "Semua";
+    let searchQuery = "";
+    let discountRate = 0;
+    let selectedMenu = null;
+    let selectedTemp = "Ice";
+    let selectedSugar = "Normal Sugar";
+
+    const formatRp = (num) => "Rp " + Math.round(num).toLocaleString("id-ID");
+
+    // Theme Switcher
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.addEventListener("click", () => {
+      const html = document.documentElement;
+      const isDark = html.getAttribute("data-theme") === "dark";
+      html.setAttribute("data-theme", isDark ? "light" : "dark");
+      themeToggle.textContent = isDark ? "🌙 Mode Gelap" : "☀️ Mode Terang";
+    });
+
+    // Tab Navigation
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".view-section").forEach(v => v.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`view-${btn.dataset.tab}`).classList.add("active");
+        if (btn.dataset.tab === "queue") renderQueue();
+        if (btn.dataset.tab === "manage") renderManageTable();
+        if (btn.dataset.tab === "sales") renderAnalytics();
+      });
+    });
+
+    // Render Menu Grid
+    function renderMenus() {
+      const grid = document.getElementById("menuGrid");
+      const filtered = menus.filter(m => {
+        const matchCat = activeCategory === "Semua" || m.category === activeCategory;
+        const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCat && matchSearch;
+      });
+
+      grid.innerHTML = filtered.map(item => `
+        <div class="menu-card ${item.available ? "" : "sold-out"}">
+          <div>
+            <div class="menu-emoji">${item.emoji}</div>
+            <div class="menu-cat">${item.category}</div>
+            <div class="menu-name">${item.name}</div>
+            <div class="menu-desc">${item.desc}</div>
+          </div>
+          <div class="menu-footer">
+            <span class="menu-price">${formatRp(item.price)}</span>
+            <button class="btn btn-primary" ${item.available ? "" : "disabled"} onclick="openCustomModal(${item.id})">
+              ${item.available ? "+ Tambah" : "Habis"}
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Category & Search Events
+    document.getElementById("categoryPills").addEventListener("click", (e) => {
+      if (!e.target.classList.contains("pill")) return;
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      e.target.classList.add("active");
+      activeCategory = e.target.dataset.cat;
+      renderMenus();
+    });
+
+    document.getElementById("searchMenu").addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderMenus();
+    });
+
+    // Custom Modal Logic
+    window.openCustomModal = (id) => {
+      selectedMenu = menus.find(m => m.id === id);
+      if (!selectedMenu) return;
+
+      document.getElementById("modalItemName").textContent = `${selectedMenu.emoji} ${selectedMenu.name}`;
+      document.getElementById("modalItemPrice").textContent = formatRp(selectedMenu.price);
+      document.getElementById("modalNote").value = "";
+
+      const isDrink = selectedMenu.category === "Kopi" || selectedMenu.category === "Non-Kopi";
+      document.getElementById("drinkOptions").style.display = isDrink ? "block" : "none";
+
+      document.getElementById("customModal").classList.add("open");
+    };
+
+    document.querySelectorAll(".option-pills").forEach(group => {
+      group.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("opt-pill")) return;
+        group.querySelectorAll(".opt-pill").forEach(p => p.classList.remove("selected"));
+        e.target.classList.add("selected");
+        if (group.dataset.group === "temp") selectedTemp = e.target.dataset.val;
+        if (group.dataset.group === "sugar") selectedSugar = e.target.dataset.val;
+      });
+    });
+
+    document.getElementById("closeCustomModal").addEventListener("click", () => {
+      document.getElementById("customModal").classList.remove("open");
+    });
+
+    document.getElementById("confirmAddCart").addEventListener("click", () => {
+      const isDrink = selectedMenu.category === "Kopi" || selectedMenu.category === "Non-Kopi";
+      const customNote = document.getElementById("modalNote").value.trim();
+      const noteParts = [];
+      if (isDrink) noteParts.push(`${selectedTemp}, ${selectedSugar}`);
+      if (customNote) noteParts.push(customNote);
+      const finalNote = noteParts.join(" • ") || "Standar";
+
+      const existing = cart.find(c => c.id === selectedMenu.id && c.note === finalNote);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({
+          id: selectedMenu.id,
+          name: selectedMenu.name,
+          price: selectedMenu.price,
+          qty: 1,
+          note: finalNote
+        });
+      }
+
+      document.getElementById("customModal").classList.remove("open");
+      renderCart();
+    });
+
+    // Cart Rendering & Calculation
+    function renderCart() {
+      const container = document.getElementById("cartItems");
+      if (cart.length === 0) {
+        container.innerHTML = `<p style="text-align:center;color:var(--text-secondary);padding:24px 0;font-size:0.86rem;">Belum ada item di keranjang.</p>`;
+      } else {
+        container.innerHTML = cart.map((item, idx) => `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <h4>${item.name}</h4>
+              <div class="cart-item-note">${item.note}</div>
+              <div style="font-size:0.8rem;font-weight:600;color:var(--accent);margin-top:2px;">${formatRp(item.price * item.qty)}</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
+              <span style="font-weight:700;font-size:0.88rem;">${item.qty}</span>
+              <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = subtotal * discountRate;
+      const afterDiscount = subtotal - discount;
+      const tax = afterDiscount * 0.1;
+      const total = afterDiscount + tax;
+
+      document.getElementById("subtotalText").textContent = formatRp(subtotal);
+      document.getElementById("discountText").textContent = "- " + formatRp(discount);
+      document.getElementById("taxText").textContent = formatRp(tax);
+      document.getElementById("totalText").textContent = formatRp(total);
+    }
+
+    window.updateQty = (idx, delta) => {
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) cart.splice(idx, 1);
+      renderCart();
+    };
+
+    document.getElementById("clearCartBtn").addEventListener("click", () => {
+      cart = [];
+      discountRate = 0;
+      document.getElementById("promoInput").value = "";
+      renderCart();
+    });
+
+    document.getElementById("applyPromoBtn").addEventListener("click", () => {
+      const code = document.getElementById("promoInput").value.trim().toUpperCase();
+      if (code === "SENJA10") {
+        discountRate = 0.10;
+        alert("Kode promo SENJA10 berhasil diterapkan (Diskon 10%)!");
+      } else if (code === "KOPI15") {
+        discountRate = 0.15;
+        alert("Kode promo KOPI15 berhasil diterapkan (Diskon 15%)!");
+      } else {
+        discountRate = 0;
+        alert("Kode promo tidak valid. Coba SENJA10 atau KOPI15.");
+      }
+      renderCart();
+    });
+
+    // Checkout & Receipt
+    document.getElementById("checkoutBtn").addEventListener("click", () => {
+      if (cart.length === 0) {
+        alert("Keranjang masih kosong!");
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = now.toTimeString().slice(0, 5);
+      const hourStr = now.getHours().toString().padStart(2, "0") + ":00";
+      const customer = document.getElementById("customerName").value.trim() || "Pelanggan Umum";
+      const type = document.getElementById("orderType").value;
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = subtotal * discountRate;
+      const tax = (subtotal - discount) * 0.1;
+      const total = subtotal - discount + tax;
+
+      const newOrder = {
+        id: "ORD-" + (101 + orders.length),
+        time: timeStr,
+        hour: hourStr,
+        customer,
+        type,
+        status: "waiting",
+        items: JSON.parse(JSON.stringify(cart)),
+        subtotal,
+        discount,
+        tax,
+        total
+      };
+
+      orders.unshift(newOrder);
+      showReceipt(newOrder);
+
+      cart = [];
+      discountRate = 0;
+      document.getElementById("promoInput").value = "";
+      renderCart();
+      updateQueueBadge();
+    });
+
+    function showReceipt(order) {
+      const itemsHtml = order.items.map(i => `
+        <div>${i.qty}x ${i.name} — ${formatRp(i.price * i.qty)}</div>
+        <div style="font-size:0.75rem;color:#555;margin-bottom:4px;">   (${i.note})</div>
+      `).join("");
+
+      document.getElementById("receiptContent").innerHTML = `
+        <div style="text-align:center;margin-bottom:10px;">
+          <strong>KOPI SENJA & RUANG</strong><br/>
+          Jl. Kenangan No. 24 • Telp: 0812-3456-7890<br/>
+          ================================
+        </div>
+        <div>No Order : ${order.id}</div>
+        <div>Waktu    : ${order.time} (${order.type})</div>
+        <div>Pelanggan: ${order.customer}</div>
+        <div>--------------------------------</div>
+        ${itemsHtml}
+        <div>--------------------------------</div>
+        <div>Subtotal : ${formatRp(order.subtotal || order.total / 1.1)}</div>
+        <div>Diskon   : - ${formatRp(order.discount || 0)}</div>
+        <div>PB1 (10%): ${formatRp(order.tax || order.total - order.total / 1.1)}</div>
+        <div style="font-weight:bold;font-size:1rem;margin-top:4px;">TOTAL    : ${formatRp(order.total)}</div>
+        <div style="text-align:center;margin-top:12px;">
+          ================================<br/>
+          Terima kasih telah berkunjung!<br/>
+          Wi-Fi: KopiSenja_Free | Pass: senja2026
+        </div>
+      `;
+      document.getElementById("receiptModal").classList.add("open");
+    }
+
+    document.getElementById("closeReceiptModal").addEventListener("click", () => {
+      document.getElementById("receiptModal").classList.remove("open");
+    });
+
+    // Barista Queue
+    function updateQueueBadge() {
+      const activeCount = orders.filter(o => o.status !== "ready").length;
+      document.getElementById("queueBadge").textContent = activeCount;
+    }
+
+    function renderQueue() {
+      const grid = document.getElementById("queueGrid");
+      grid.innerHTML = orders.map(order => {
+        const statusLabel = {
+          waiting: "Menunggu Dibuat",
+          brewing: "Sedang Diramu",
+          ready: "Siap Disajikan"
+        }[order.status];
+
+        const nextBtn = order.status === "waiting"
+          ? `<button class="btn btn-primary" onclick="advanceOrder('${order.id}', 'brewing')">Mulai Racik</button>`
+          : order.status === "brewing"
+          ? `<button class="btn btn-primary" style="background:var(--success);" onclick="advanceOrder('${order.id}', 'ready')">Tandai Siap</button>`
+          : `<span style="color:var(--success);font-weight:700;font-size:0.85rem;">✓ Selesai</span>`;
+
+        return `
+          <div class="order-ticket">
+            <div class="ticket-top">
+              <div>
+                <strong>${order.id}</strong> • <span style="font-size:0.82rem;color:var(--text-secondary);">${order.time}</span>
+                <div style="font-size:0.88rem;font-weight:600;margin-top:2px;">${order.customer} (${order.type})</div>
+              </div>
+              <span class="status-badge status-${order.status}">${statusLabel}</span>
+            </div>
+            <ul class="ticket-list">
+              ${order.items.map(i => `<li><strong>${i.qty}x ${i.name}</strong><br/><small style="color:var(--text-secondary);">${i.note}</small></li>`).join("")}
+            </ul>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span style="font-weight:700;">${formatRp(order.total)}</span>
+              ${nextBtn}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.advanceOrder = (id, nextStatus) => {
+      const target = orders.find(o => o.id === id);
+      if (target) target.status = nextStatus;
+      renderQueue();
+      updateQueueBadge();
+    };
+
+    // Menu Management
+    document.getElementById("addMenuForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newMenu = {
+        id: Date.now(),
+        name: document.getElementById("newName").value.trim(),
+        category: document.getElementById("newCat").value,
+        price: parseInt(document.getElementById("newPrice").value, 10),
+        emoji: document.getElementById("newEmoji").value.trim() || "☕",
+        desc: document.getElementById("newDesc").value.trim(),
+        available: true
+      };
+      menus.push(newMenu);
+      e.target.reset();
+      renderMenus();
+      renderManageTable();
+      alert("Menu baru berhasil ditambahkan!");
+    });
+
+    function renderManageTable() {
+      const tbody = document.getElementById("manageTableBody");
+      tbody.innerHTML = menus.map(m => `
+        <tr>
+          <td><strong>${m.emoji} ${m.name}</strong></td>
+          <td>${m.category}</td>
+          <td>
+            <input type="number" value="${m.price}" step="500" style="width:110px;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg-subtle);color:var(--text-primary);"
+              onchange="updateMenuPrice(${m.id}, this.value)" />
+          </td>
+          <td>
+            <button class="btn" style="background:${m.available ? 'var(--success-bg)' : 'var(--danger-bg)'};color:${m.available ? 'var(--success)' : 'var(--danger)'};"
+              onclick="toggleStock(${m.id})">
+              ${m.available ? "Tersedia" : "Stok Habis"}
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-danger" onclick="deleteMenu(${m.id})">Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.updateMenuPrice = (id, val) => {
+      const item = menus.find(m => m.id === id);
+      if (item && val > 0) {
+        item.price = parseInt(val, 10);
+        renderMenus();
+      }
+    };
+
+    window.toggleStock = (id) => {
+      const item = menus.find(m => m.id === id);
+      if (item) {
+        item.available = !item.available;
+        renderMenus();
+        renderManageTable();
+      }
+    };
+
+    window.deleteMenu = (id) => {
+      menus = menus.filter(m => m.id !== id);
+      renderMenus();
+      renderManageTable();
+    };
+
+    // Sales Analytics
+    function renderAnalytics() {
+      const totalRev = orders.reduce((s, o) => s + o.total, 0);
+      document.getElementById("statRevenue").textContent = formatRp(totalRev);
+      document.getElementById("statOrders").textContent = orders.length + " Pesanan";
+
+      const itemCount = {};
+      orders.forEach(o => o.items.forEach(i => {
+        itemCount[i.name] = (itemCount[i.name] || 0) + i.qty;
+      }));
+      const topItem = Object.entries(itemCount).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById("statTopItem").textContent = topItem ? `${topItem[0]} (${topItem[1]}x)` : "-";
+
+      // Hourly Chart
+      const hours = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
+      const hourlyTotals = hours.map(h => orders.filter(o => o.hour === h).reduce((s, o) => s + o.total, 0));
+      const maxVal = Math.max(...hourlyTotals, 50000);
+
+      document.getElementById("salesChart").innerHTML = hours.map((h, idx) => {
+        const pct = Math.round((hourlyTotals[idx] / maxVal) * 100);
+        return `
+          <div class="bar-col">
+            <span style="font-size:0.72rem;color:var(--text-secondary);">${hourlyTotals[idx] > 0 ? (hourlyTotals[idx]/1000) + 'k' : ''}</span>
+            <div class="bar-fill" style="height:${Math.max(pct, 6)}%;"></div>
+            <span style="font-size:0.78rem;font-weight:600;">${h}</span>
+          </div>
+        `;
+      }).join("");
+
+      // History Table
+      document.getElementById("historyTableBody").innerHTML = orders.map((o, idx) => `
+        <tr>
+          <td><strong>${o.id}</strong></td>
+          <td>${o.time}</td>
+          <td>${o.customer}</td>
+          <td>${o.type}</td>
+          <td><strong>${formatRp(o.total)}</strong></td>
+          <td><button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;" onclick="reprintOrder(${idx})">Lihat Struk</button></td>
+        </tr>
+      `).join("");
+    }
+
+    window.reprintOrder = (idx) => {
+      showReceipt(orders[idx]);
+    };
+
+    // Init
+    renderMenus();
+    renderCart();
+    updateQueueBadge();
+  </script>
+</body>
+</html>
